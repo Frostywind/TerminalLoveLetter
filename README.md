@@ -1,2 +1,2 @@
-# TerminalLoveLetter
-Love letter for your terminal (fan made in C++)
+# TerminalLoveLetter FR
+Love Letter pour votre terminal
