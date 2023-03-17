@@ -36,7 +36,7 @@ struct Deck {
         return nextCard;
     }
 
-    void insertBack(std::vector<cardNumber> cards) {
+    void insertBack(std::vector<cardNumber> &cards) {
         for (cardNumber card : cards) {
             cards[endIndex] = card;
             endIndex++;
@@ -85,11 +85,11 @@ public :
                 std::cout << "Comtesse joué automatiquement" << '\n';
                 actualPlayer->second = cardDraw;
                 cardPlayed = 8;
-                cardEffect(8, actualPlayer->first);
+                cardEffect(8, *(new std::string(actualPlayer->first)));
             } else if (cardDraw == 8 && (actualPlayer->second == 5 || actualPlayer->second == 7)) {
                 std::cout << "Comtesse joué automatiquement" << '\n';
                 cardPlayed = 8;
-                cardEffect(8, actualPlayer->first);
+                cardEffect(8, *(new std::string(actualPlayer->first)));
             } else {
                 std::cout << "\nVous avez pouvez jouer les cartes :";
                 std::cout << "\n\n1. " << cardRef[actualPlayer->second];
@@ -101,10 +101,10 @@ public :
                 if (cardChoice == 1) {
                     cardPlayed = actualPlayer->second;
                     actualPlayer->second = cardDraw;
-                    cardEffect(cardPlayed, actualPlayer->first);
+                    cardEffect(cardPlayed, *(new std::string(actualPlayer->first)));
                 } else {
                     cardPlayed = cardDraw;
-                    cardEffect(cardPlayed, actualPlayer->first);
+                    cardEffect(cardPlayed, *(new std::string(actualPlayer->first)));
                 }
             }
             
@@ -118,7 +118,7 @@ public :
                 if (actualPlayer == players.end()) {
                     actualPlayer = players.begin();
                 }
-                summaryScreen(ancientPlayer->first, actualPlayer->first, cardPlayed);
+                summaryScreen(*(new std::string(ancientPlayer->first)), *(new std::string(actualPlayer->first)), cardPlayed);
             }
         }
 
@@ -143,7 +143,8 @@ private :
         printf("\n                                                                                     ");
         printf("\n                                                                                     ");
         printf("\n                                                                                     ");                                       
-        printf("\n ___     _______ __   __ _______    ___     _______ _______ _______ _______ _______  "
+        printf(
+        "\n ___     _______ __   __ _______    ___     _______ _______ _______ _______ _______  "
         "\n|   |   |       |  | |  |       |  |   |   |       |       |       |       |    _  | "
         "\n|   |   |   _   |  |_|  |    ___|  |   |   |    ___|_     _|_     _|    ___|   | | | "
         "\n|   |   |  | |  |       |   |___   |   |   |   |___  |   |   |   | |   |___|   |_| | "
@@ -161,7 +162,7 @@ private :
         clearShell();
     }
 
-    void summaryScreen(std::string ancientPlayer, std::string actualPlayer, int cardPlayed) {
+    void summaryScreen(std::string &ancientPlayer, std::string &actualPlayer, int cardPlayed) {
         std::cout << "\nAppuyer sur entrer pour continuer";
         std::cin.ignore();
         std::cin.ignore();
@@ -232,14 +233,14 @@ private :
         }
     }
 
-    void spy(std::string actualPlayer) {
+    void spy(std::string &actualPlayer) {
         std::cout << "La lettre n'est qu'une couverture c'est celle d'un espion !" << '\n';
         if (std::find(spyPlayer.begin(), spyPlayer.end(), actualPlayer) == spyPlayer.end()) {
             spyPlayer.push_back(actualPlayer);
         }
     }
 
-    void guard(std::string actualPlayer) {
+    void guard(std::string &actualPlayer) {
         std::cout << "C'est l'heure de la délation !!!" << '\n';
 
         std::string targetPlayer = choosePlayer(actualPlayer);
@@ -259,7 +260,7 @@ private :
         }
     }
 
-    void priest(std::string actualPlayer) {
+    void priest(std::string &actualPlayer) {
         std::cout << "Le prêtre connait tous les potins" << '\n';
 
         std::string targetPlayer = choosePlayer(actualPlayer);
@@ -269,7 +270,7 @@ private :
         }
     }
 
-    void baron(std::string actualPlayer) {
+    void baron(std::string &actualPlayer) {
         std::cout << "Le Baron est là ça va saigner !! (Probablement)" << '\n';
 
         std::string targetPlayer = choosePlayer(actualPlayer);
@@ -286,15 +287,16 @@ private :
         }
     }
 
-    void servant(std::string actualPlayer) {
+    void servant(std::string &actualPlayer) {
         std::cout << "Vous êtes protéger pour un tour par la servante [DAB]" << '\n';
         servantPlayer.push_back(actualPlayer);
     }
 
-    void prince(std::string actualPlayer) {
+    void prince(std::string &actualPlayer) {
         std::cout << "Il manque pas de bel aire ce prince !" << '\n';
 
-        std::string targetPlayer = choosePlayer("");
+        std::string *playerName = new std::string("");
+        std::string targetPlayer = choosePlayer(*playerName);
 
         if (players.at(targetPlayer) == 9) {
             killPlayer(targetPlayer);
@@ -307,37 +309,37 @@ private :
         }
     }
 
-    void chancellor(std::string actualPlayer) {
+    void chancellor(std::string &actualPlayer) {
         std::cout << "Le Conseiller prodigue de bon conseil" << '\n';
 
         cardNumber firstChoice = deck.draw();
         cardNumber secondChoice = deck.draw();
-        std::vector<cardNumber> choices = {firstChoice, secondChoice, players.at(actualPlayer)};
+        std::vector<cardNumber> *choices = new std::vector<cardNumber>({firstChoice, secondChoice, players.at(actualPlayer)});
         
         std::cout << "\nVous avez les cartes :";
-        std::cout << "\n\n1. " << cardRef[choices[0]];
-        std::cout << "\n2. " << cardRef[choices[1]];
-        std::cout << "\n3. " << cardRef[choices[2]];
+        std::cout << "\n\n1. " << cardRef[choices->at(0)];
+        std::cout << "\n2. " << cardRef[choices->at(1)];
+        std::cout << "\n3. " << cardRef[choices->at(2)];
         std::cout << "\n\nLaquelle souhaitait vous garder [1, 2 ou 3] : ";
         
         int cardPlayed;
         std::cin >> cardPlayed;
-        players[actualPlayer] = choices.at(cardPlayed - 1);
-        choices.erase(choices.begin() + cardPlayed - 1);
+        players[actualPlayer] = choices->at(cardPlayed - 1);
+        choices->erase(choices->begin() + cardPlayed - 1);
 
 
         std::cout << "\nVous avez les cartes :";
-        std::cout << "\n\n1. " << cardRef[choices[0]];
-        std::cout << "\n2. " << cardRef[choices[1]];
+        std::cout << "\n\n1. " << cardRef[choices->at(0)];
+        std::cout << "\n2. " << cardRef[choices->at(1)];
         std::cout << "\n\nQuelle carte souhaiter vous mettre tout en dessous du deck [1 ou 2] : ";
         
         int cardBelow;
         std::cin >> cardBelow;
-        if (cardBelow - 1 == 0) std::swap(choices.at(0), choices.at(1));
-        deck.insertBack(choices);
+        if (cardBelow - 1 == 0) std::swap(choices->at(0), choices->at(1));
+        deck.insertBack(*choices);
     }
 
-    void king(std::string actualPlayer) {
+    void king(std::string &actualPlayer) {
         std::cout << "The king !" << '\n';
         std::string targetPlayer = choosePlayer(actualPlayer);                               
 
@@ -348,17 +350,17 @@ private :
         }
     }
 
-    void countess(std::string actualPlayer) {
+    void countess(std::string &actualPlayer) {
         std::cout << "La comptesse ! (DOUBT)" << '\n';
     }
 
-    void princess(std::string actualPlayer) {
+    void princess(std::string &actualPlayer) {
         std::cout << "La Princesse est partie !" << '\n';
         killPlayer(actualPlayer);
     }
 
-    using funPtr = void(Game::*)(std::string);
-    void cardEffect(cardNumber cardPlayed, std::string actualPlayer) {
+    using funPtr = void(Game::*)(std::string&);
+    void cardEffect(cardNumber cardPlayed, std::string &actualPlayer) {
         funPtr funPtrArray[10];
         funPtrArray[0] = &Game::spy;
         funPtrArray[1] = &Game::guard;
@@ -374,7 +376,7 @@ private :
         (*this.*funPtrArray[cardPlayed])(actualPlayer);
     }
 
-    std::string choosePlayer(std::string actualPlayer) {
+    std::string choosePlayer(std::string &actualPlayer) {
         std::string playerName;
         if (actualPlayer != "" && players.size() - 1 == servantPlayer.size()) {
             std::cout << "Aucun.e joueur.se ne peut être ciblé.e" << '\n';
@@ -404,7 +406,7 @@ private :
         return playerName;
     }
 
-    void killPlayer(std::string playerName) {
+    void killPlayer(std::string &playerName) {
         auto player = players.find(playerName);
         auto spyIt = std::find(spyPlayer.begin(), spyPlayer.end(), playerName);
         if (spyIt != spyPlayer.end()) {
